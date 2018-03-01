@@ -1,21 +1,50 @@
 package main
 
 import (
-	"log"
+	"flag"
 	"os"
 	"syscall"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/fsnotify/fsnotify"
-	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1alpha"
+	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1alpha1"
+)
+
+var (
+	MasterNetDevice string = ""
 )
 
 func main() {
-	log.Println("Fetching devices.")
-	if len(getDevices()) == 0 {
-		log.Println("No devices found. Waiting indefinitely.")
-		select {}
+	// Parse command-line arguments
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	flagMasterNetDev := flag.String("master", "", "Master ethernet network device for SRIOV, ex: eth1.")
+	flagLogLevel := flag.String("log-level", "info", "Define the logging level: error, info, debug.")
+	flag.Parse()
+
+	switch *flagLogLevel {
+	case "debug":
+		log.SetLevel(log.DebugLevel)
+	case "info":
+		log.SetLevel(log.InfoLevel)
 	}
 
+	if *flagMasterNetDev != "" {
+		MasterNetDevice = *flagMasterNetDev
+	}
+
+	log.Println("Fetching devices.")
+
+	devList, err := GetDevices(MasterNetDevice)
+	if err != nil {
+		log.Errorf("Error to get IB device: %v", err)
+		return
+	}
+	if len(devList) == 0 {
+		log.Println("No devices found.")
+		return
+	}
+
+	log.Debugf("RDMA device list: %v", devList)
 	log.Println("Starting FS watcher.")
 	watcher, err := newFSWatcher(pluginapi.DevicePluginPath)
 	if err != nil {
@@ -28,7 +57,7 @@ func main() {
 	sigs := newOSWatcher(syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
 	restart := true
-	var devicePlugin *NvidiaDevicePlugin
+	var devicePlugin *RdmaDevicePlugin
 
 L:
 	for {
@@ -37,7 +66,7 @@ L:
 				devicePlugin.Stop()
 			}
 
-			devicePlugin = NewRdmaDevicePlugin()
+			devicePlugin = NewRdmaDevicePlugin(MasterNetDevice)
 			if err := devicePlugin.Serve(); err != nil {
 				log.Println("Could not contact Kubelet, retrying. Did you enable the device plugin feature gate?")
 			} else {

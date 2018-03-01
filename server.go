@@ -2,16 +2,15 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"path"
-	"strings"
 	"time"
 
+	log "github.com/Sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1alpha"
+	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1alpha1"
 )
 
 const (
@@ -21,8 +20,11 @@ const (
 
 // RdmaDevicePlugin implements the Kubernetes device plugin API
 type RdmaDevicePlugin struct {
-	devs   []*pluginapi.Device
-	socket string
+	devs []*pluginapi.Device
+	// ID => Device
+	devices         map[string]Device
+	socket          string
+	masterNetDevice string
 
 	stop   chan interface{}
 	health chan *pluginapi.Device
@@ -31,13 +33,31 @@ type RdmaDevicePlugin struct {
 }
 
 // NewRdmaDevicePlugin returns an initialized RdmaDevicePlugin
-func NewRdmaDevicePlugin() *RdmaDevicePlugin {
-	return &RdmaDevicePlugin{
-		devs:   getDevices(),
-		socket: serverSock,
+func NewRdmaDevicePlugin(master string) *RdmaDevicePlugin {
+	devices, err := GetDevices(master)
+	if err != nil {
+		log.Errorf("Error to get RDMA devices: %v", err)
+		return nil
+	}
 
-		stop:   make(chan interface{}),
-		health: make(chan *pluginapi.Device),
+	var devs []*pluginapi.Device
+	devMap := make(map[string]Device)
+	for _, device := range devices {
+		id := device.RdmaDevice.Name
+		devs = append(devs, &pluginapi.Device{
+			ID:     id,
+			Health: pluginapi.Healthy,
+		})
+		devMap[id] = device
+	}
+
+	return &RdmaDevicePlugin{
+		masterNetDevice: master,
+		socket:          serverSock,
+		devs:            devs,
+		devices:         devMap,
+		stop:            make(chan interface{}),
+		health:          make(chan *pluginapi.Device),
 	}
 }
 
@@ -144,17 +164,31 @@ func (m *RdmaDevicePlugin) unhealthy(dev *pluginapi.Device) {
 // Allocate which return list of devices.
 func (m *RdmaDevicePlugin) Allocate(ctx context.Context, r *pluginapi.AllocateRequest) (*pluginapi.AllocateResponse, error) {
 	devs := m.devs
-	response := pluginapi.AllocateResponse{
-		Envs: map[string]string{
-			"NVIDIA_VISIBLE_DEVICES": strings.Join(r.DevicesIDs, ","),
-		},
-	}
+	response := pluginapi.AllocateResponse{}
 
+	log.Debugf("Request IDs: %v", r.DevicesIDs)
+	var devicesList []*pluginapi.DeviceSpec
 	for _, id := range r.DevicesIDs {
 		if !deviceExists(devs, id) {
 			return nil, fmt.Errorf("invalid allocation request: unknown device: %s", id)
 		}
+
+		var devPath string
+		if dev, ok := m.devices[id]; ok {
+			// TODO: to function
+			devPath = fmt.Sprintf("/dev/infiniband/%s", dev.RdmaDevice.DevName)
+		}
+
+		ds := &pluginapi.DeviceSpec{
+			ContainerPath: devPath,
+			HostPath:      devPath,
+			Permissions:   "rw",
+		}
+		devicesList = append(devicesList, ds)
 	}
+
+	spec := &pluginapi.DeviceRuntimeSpec{Devices: devicesList}
+	response.Spec = []*pluginapi.DeviceRuntimeSpec{spec}
 
 	return &response, nil
 }
@@ -188,18 +222,18 @@ func (m *RdmaDevicePlugin) healthcheck() {
 func (m *RdmaDevicePlugin) Serve() error {
 	err := m.Start()
 	if err != nil {
-		log.Printf("Could not start device plugin: %s", err)
+		log.Errorf("Could not start device plugin: %v", err)
 		return err
 	}
-	log.Println("Starting to serve on", m.socket)
+	log.Infof("Starting to serve on %s", m.socket)
 
 	err = m.Register(pluginapi.KubeletSocket, resourceName)
 	if err != nil {
-		log.Printf("Could not register device plugin: %s", err)
+		log.Errorf("Could not register device plugin: %v", err)
 		m.Stop()
 		return err
 	}
-	log.Println("Registered device plugin with Kubelet")
+	log.Infof("Registered device plugin with Kubelet")
 
 	return nil
 }
