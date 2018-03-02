@@ -50,7 +50,14 @@ Install `ibverbs` libraries, then start `kubelet` with `--feature-gates=DevicePl
 * Run device plugin daemon process
 
 ```
-# bin/k8s-rdma-device-plugin -master eth1
+# bin/k8s-rdma-device-plugin -master eth1 -log-level debug
+INFO[0000] Fetching devices.                            
+DEBU[0000] RDMA device list: [{{mlx4_1 uverbs1 /sys/class/infiniband_verbs/uverbs1 /sys/class/infiniband/mlx4_1} eth2} {{mlx4_3 uverbs3 /sys/class/infiniband_verbs/uverbs3 /sys/class/infiniband/mlx4_3} eth4} {{mlx4_2 uverbs2 /sys/class/infiniband_verbs/uverbs2 /sys/class/infiniband/mlx4_2} eth3} {{mlx4_4 uverbs4 /sys/class/infiniband_verbs/uverbs4 /sys/class/infiniband/mlx4_4} eth5}] 
+INFO[0000] Starting FS watcher.                         
+INFO[0000] Starting OS watcher.                         
+INFO[0000] Starting to serve on /var/lib/kubelet/device-plugins/rdma.sock 
+INFO[0000] Registered device plugin with Kubelet
+...
 ```
 
 * Run RDMA container
@@ -80,9 +87,9 @@ FROM mellanox/mofed421_docker:latest
 CMD ["/bin/sleep", "360000"]
 ```
 
-*** Note!!! ***
+*** NOTE!!! ***
 
-`/dev/infiniband/rdma_cm` device is needed for `uverbs` device in container. However, Kubernetes is not support pass device to container, refer to [issue 5607](https://github.com/kubernetes/kubernetes/issues/5607).
+`/dev/infiniband/rdma_cm` device is needed for `uverbs` device in container for run RDMA application. However, Kubernetes is not support pass device to container, refer to [issue 5607](https://github.com/kubernetes/kubernetes/issues/5607). We wish this can be fixed ASAP.
 
 ### Work with sriov-cni plugin
 
