@@ -1,6 +1,6 @@
 # RDMA device plugin for Kubernetes
 
-## About
+## Introdution
 
 `k8s-rdma-device-plugin` is a [device plugin](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/resource-management/device-plugin.md) for Kubernetes to manage [RDMA](https://en.wikipedia.org/wiki/Remote_direct_memory_access) device.
 
@@ -89,13 +89,12 @@ CMD ["/bin/sleep", "360000"]
 
 *** NOTE!!! ***
 
-`/dev/infiniband/rdma_cm` device is needed for `uverbs` device in container for run RDMA application. However, Kubernetes is not support pass device to container, refer to [issue 5607](https://github.com/kubernetes/kubernetes/issues/5607). We wish this can be fixed ASAP.
+`/dev/infiniband/rdma_cm` device is needed for `uverbs` device in container for run RDMA application. However, Kubernetes is not support pass host device to container, refer to [issue 5607](https://github.com/kubernetes/kubernetes/issues/5607). We wish this can be fixed ASAP.
 
 ### Work with sriov-cni plugin
 
-TODO:
-
+TODO: Kubernetes call DP(device plugin) when [Admit](https://github.com/kubernetes/kubernetes/blob/v1.9.3/pkg/kubelet/kubelet.go#L1998) pod, and call CNI plugin when creating sandbox container. We need a way that pass RDMA device information from DP to CNI. Refer to the [issue 32](https://github.com/hustcat/sriov-cni/issues/32).
 
 ### Work with NVIDIA GPU plugin
 
-TODO:
+TODO: For high performance, we should coordinate the `k8s-rdma-device-plugin` and [nvidia device plugin](https://github.com/NVIDIA/k8s-device-plugin), and try to make RDMA devices and GPU devices are located in the same PCIe switch.
