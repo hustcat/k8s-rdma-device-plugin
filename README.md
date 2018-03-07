@@ -1,6 +1,6 @@
 # RDMA device plugin for Kubernetes
 
-## Introdution
+## Introduction
 
 `k8s-rdma-device-plugin` is a [device plugin](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/resource-management/device-plugin.md) for Kubernetes to manage [RDMA](https://en.wikipedia.org/wiki/Remote_direct_memory_access) device.
 
@@ -97,4 +97,4 @@ TODO: Kubernetes call DP(device plugin) when [Admit](https://github.com/kubernet
 
 ### Work with NVIDIA GPU plugin
 
-TODO: For high performance, we should coordinate the `k8s-rdma-device-plugin` and [nvidia device plugin](https://github.com/NVIDIA/k8s-device-plugin), and try to make RDMA devices and GPU devices are located in the same PCIe switch.
+TODO: For high performance, we should coordinate the `k8s-rdma-device-plugin` and [nvidia device plugin](https://github.com/NVIDIA/k8s-device-plugin), and try to make RDMA devices and GPU devices allocated for the same container are located in the same PCIe switch.
