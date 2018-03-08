@@ -10,7 +10,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1alpha1"
+	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1alpha"
 )
 
 const (
@@ -94,7 +94,7 @@ func (m *RdmaDevicePlugin) Start() error {
 
 	go m.server.Serve(sock)
 
-	// Wait for server to start by launching a blocking connexion
+	// Wait for server to start by launching a blocking connection
 	conn, err := dial(m.socket, 5*time.Second)
 	if err != nil {
 		return err
@@ -187,8 +187,7 @@ func (m *RdmaDevicePlugin) Allocate(ctx context.Context, r *pluginapi.AllocateRe
 		devicesList = append(devicesList, ds)
 	}
 
-	spec := &pluginapi.DeviceRuntimeSpec{Devices: devicesList}
-	response.Spec = []*pluginapi.DeviceRuntimeSpec{spec}
+	response.Devices = devicesList
 
 	return &response, nil
 }

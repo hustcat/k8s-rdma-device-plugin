@@ -1,5 +1,5 @@
-hash: 62f0302667e5ce8113648b63d500912db60dc5a10fdf9d677a7e4b82d6f07647
-updated: 2018-03-02T17:03:12.186182146+08:00
+hash: 3290fa6395c012322cd829854e35dab1dd306415d7ac018d2adeb504b16fc028
+updated: 2018-03-08T10:02:32.302768311+08:00
 imports:
 - name: github.com/fsnotify/fsnotify
   version: c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9
@@ -29,10 +29,11 @@ imports:
   - protoc-gen-gogo/grpc
   - protoc-gen-gogo/plugin
   - sortkeys
+  - types
   - vanity
   - vanity/command
 - name: github.com/golang/protobuf
-  version: 4bd1920723d7b7c925de087aa32e2187708897f7
+  version: 1643683e1b54a9e88ad26d98f81400c8c9d9f4f9
   subpackages:
   - proto
   - ptypes/any
@@ -53,7 +54,7 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/sys
-  version: 7ddbeae9ae08c6a06a59597f0c9edbc5ff2444ce
+  version: 95c6576299259db960f6c5b9b69ea52422860fce
   subpackages:
   - unix
   - windows
@@ -97,7 +98,7 @@ imports:
   - tap
   - transport
 - name: k8s.io/kubernetes
-  version: f0efb3cb883751c5ffdbe6d515f3cb4fbe7b7acd
+  version: d2835416544f298c919e2ead3be3d0864b52323b
   subpackages:
-  - pkg/kubelet/apis/deviceplugin/v1alpha1
+  - pkg/kubelet/apis/deviceplugin/v1alpha
 testImports: []

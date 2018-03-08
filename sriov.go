@@ -3,9 +3,12 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"net"
 	"os"
 	"strconv"
 	"strings"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 const VfNetDevicePath = "/sys/class/net/%s/device/virtfn%d/net"
@@ -50,8 +53,28 @@ func GetVfNetDevice(master string) ([]string, error) {
 }
 
 func GetAllNetDevice() ([]string, error) {
-	// TODO:
-	return nil, nil
+	var res = []string{}
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		log.Errorf("localAddresses: %+v\n", err)
+		return nil, err
+	}
+	for _, iface := range ifaces {
+		if iface.Flags&(1<<uint(0)) == 0 {
+			continue
+		}
+		if iface.Flags&(1<<uint(1)) == 0 {
+			continue
+		}
+		if iface.Flags&(1<<uint(2)) != 0 {
+			continue
+		}
+		if strings.HasPrefix(iface.Name, "docker") || strings.HasPrefix(iface.Name, "cali") {
+			continue
+		}
+		res = append(res, iface.Name)
+	}
+	return res, nil
 }
 
 func getVFDeviceName(master string, vf int) (string, error) {
