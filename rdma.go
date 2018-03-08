@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 
 	"golang.org/x/net/context"
-	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1alpha1"
+	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1alpha"
 
 	"github.com/hustcat/k8s-rdma-device-plugin/ibverbs"
 )
@@ -34,7 +34,6 @@ func getAllRdmaDeivces() ([]Device, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	for _, d := range ibvDevList {
 		for _, n := range netDevList {
 			dResource, err := getRdmaDeviceResoure(d.Name)
