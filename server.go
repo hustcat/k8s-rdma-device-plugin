@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	resourceName = "tencent.com/rdma"
-	serverSock   = pluginapi.DevicePluginPath + "rdma.sock"
+	defaultResourceName = "tencent.com/rdma"
+	serverSock          = pluginapi.DevicePluginPath + "rdma.sock"
 )
 
 // RdmaDevicePlugin implements the Kubernetes device plugin API
@@ -218,7 +218,7 @@ func (m *RdmaDevicePlugin) healthcheck() {
 }
 
 // Serve starts the gRPC server and register the device plugin to Kubelet
-func (m *RdmaDevicePlugin) Serve() error {
+func (m *RdmaDevicePlugin) Serve(resourceName string) error {
 	err := m.Start()
 	if err != nil {
 		log.Errorf("Could not start device plugin: %v", err)

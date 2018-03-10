@@ -19,6 +19,7 @@ func main() {
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	flagMasterNetDev := flag.String("master", "", "Master ethernet network device for SRIOV, ex: eth1.")
 	flagLogLevel := flag.String("log-level", "info", "Define the logging level: error, info, debug.")
+	flagResourceName := flag.String("resource-name", defaultResourceName, "Define the default resource name: tencent.com/rdma.")
 	flag.Parse()
 
 	switch *flagLogLevel {
@@ -67,7 +68,7 @@ L:
 			}
 
 			devicePlugin = NewRdmaDevicePlugin(MasterNetDevice)
-			if err := devicePlugin.Serve(); err != nil {
+			if err := devicePlugin.Serve(*flagResourceName); err != nil {
 				log.Println("Could not contact Kubelet, retrying. Did you enable the device plugin feature gate?")
 			} else {
 				restart = false
