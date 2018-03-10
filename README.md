@@ -32,7 +32,7 @@ Install libibverbs package, for CentOS:
 # yum install libibverbs-devel -y
 ```
 
-Than run `build`:
+Then run `build`:
 
 ```
 # ./build 
@@ -58,6 +58,15 @@ INFO[0000] Starting OS watcher.
 INFO[0000] Starting to serve on /var/lib/kubelet/device-plugins/rdma.sock 
 INFO[0000] Registered device plugin with Kubelet
 ...
+```
+
+or deploy it as a daemonset:
+
+```
+# kubectl -n kube-system apply -f rdma-device-plugin.yml
+# kubectl -n kube-system get pods
+rdma-device-plugin-daemonset-2wbdv         1/1       Running   0          14m
+rdma-device-plugin-daemonset-7pwf7         1/1       Running   0          14m
 ```
 
 * Run RDMA container
