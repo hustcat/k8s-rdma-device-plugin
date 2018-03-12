@@ -177,6 +177,8 @@ func (m *RdmaDevicePlugin) Allocate(ctx context.Context, r *pluginapi.AllocateRe
 		if dev, ok := m.devices[id]; ok {
 			// TODO: to function
 			devPath = fmt.Sprintf("/dev/infiniband/%s", dev.RdmaDevice.DevName)
+		} else {
+			continue
 		}
 
 		ds := &pluginapi.DeviceSpec{
@@ -185,6 +187,18 @@ func (m *RdmaDevicePlugin) Allocate(ctx context.Context, r *pluginapi.AllocateRe
 			Permissions:   "rw",
 		}
 		devicesList = append(devicesList, ds)
+	}
+
+	// for /dev/infiniband/rdma_cm
+	rdma_cm_paths := []string{
+		"/dev/infiniband/rdma_cm",
+	}
+	for _, dev := range rdma_cm_paths {
+		devicesList = append(devicesList, &pluginapi.DeviceSpec{
+			ContainerPath: dev,
+			HostPath:      dev,
+			Permissions:   "rw",
+		})
 	}
 
 	response.Devices = devicesList
