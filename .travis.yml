@@ -1,0 +1,17 @@
+sudo: required
+dist: trusty
+language: go
+
+go:
+    - 1.6
+    - 1.7
+    - 1.8
+    - 1.9
+
+before_script:
+    - sudo apt-get install -y libibverbs-dev
+
+script:
+   - cd ${TRAVIS_BUILD_DIR}
+   - hack/verify-gofmt.sh
+   - ./build
