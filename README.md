@@ -96,14 +96,16 @@ FROM mellanox/mofed421_docker:latest
 CMD ["/bin/sleep", "360000"]
 ```
 
-*** NOTE!!! ***
+## TODO
 
-`/dev/infiniband/rdma_cm` device is needed for `uverbs` device in container for run RDMA application. However, Kubernetes is not support pass host device to container, refer to [issue 5607](https://github.com/kubernetes/kubernetes/issues/5607). We wish this can be fixed ASAP.
+### Share RDMA device for the containers in the same pod
+
+Generally speaking, for RoCE with k8s, all containers in the same pod should share the same RDMA devices, this is unsupported by k8s now.
 
 ### Work with sriov-cni plugin
 
-TODO: Kubernetes call DP(device plugin) when [Admit](https://github.com/kubernetes/kubernetes/blob/v1.9.3/pkg/kubelet/kubelet.go#L1998) pod, and call CNI plugin when creating sandbox container. We need a way that pass RDMA device information from DP to CNI. Refer to the [issue 32](https://github.com/hustcat/sriov-cni/issues/32).
+Kubernetes call DP(device plugin) when [Admit](https://github.com/kubernetes/kubernetes/blob/v1.9.3/pkg/kubelet/kubelet.go#L1998) pod, and call CNI plugin when creating sandbox container. We need a way that pass RDMA device information from DP to CNI. Refer to the [issue 32](https://github.com/hustcat/sriov-cni/issues/32).
 
 ### Work with NVIDIA GPU plugin
 
-TODO: For high performance, we should coordinate the `k8s-rdma-device-plugin` and [nvidia device plugin](https://github.com/NVIDIA/k8s-device-plugin), and try to make RDMA devices and GPU devices allocated for the same container are located in the same PCIe switch.
+For high performance, we should coordinate the `k8s-rdma-device-plugin` and [nvidia device plugin](https://github.com/NVIDIA/k8s-device-plugin), and try to make RDMA devices and GPU devices allocated for the same container are located under the same PCIe switch.
