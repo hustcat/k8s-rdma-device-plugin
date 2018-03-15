@@ -1,6 +1,7 @@
 sudo: required
 dist: trusty
 language: go
+install: true
 
 go:
     - 1.6
