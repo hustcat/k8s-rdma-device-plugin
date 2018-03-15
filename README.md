@@ -1,4 +1,4 @@
-# RDMA device plugin for Kubernetes
+# RDMA device plugin for Kubernetes ![](https://travis-ci.org/hustcat/k8s-rdma-device-plugin.svg?branch=master)
 
 ## Introduction
 
