@@ -1,15 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"os"
 	"path"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	log "k8s.io/klog"
 	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1alpha"
 )
 
@@ -166,7 +166,7 @@ func (m *RdmaDevicePlugin) Allocate(ctx context.Context, r *pluginapi.AllocateRe
 	devs := m.devs
 	response := pluginapi.AllocateResponse{}
 
-	log.Debugf("Request IDs: %v", r.DevicesIDs)
+	log.V(1).Infof("Request IDs: %v", r.DevicesIDs)
 	var devicesList []*pluginapi.DeviceSpec
 	for _, id := range r.DevicesIDs {
 		if !deviceExists(devs, id) {
