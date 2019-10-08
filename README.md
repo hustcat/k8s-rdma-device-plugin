@@ -50,7 +50,7 @@ Install `ibverbs` libraries, then start `kubelet` with `--feature-gates=DevicePl
 * Run device plugin daemon process
 
 ```
-# bin/k8s-rdma-device-plugin -master eth1 -log-level debug
+# bin/k8s-rdma-device-plugin -master eth1 -v 4
 INFO[0000] Fetching devices.                            
 DEBU[0000] RDMA device list: [{{mlx4_1 uverbs1 /sys/class/infiniband_verbs/uverbs1 /sys/class/infiniband/mlx4_1} eth2} {{mlx4_3 uverbs3 /sys/class/infiniband_verbs/uverbs3 /sys/class/infiniband/mlx4_3} eth4} {{mlx4_2 uverbs2 /sys/class/infiniband_verbs/uverbs2 /sys/class/infiniband/mlx4_2} eth3} {{mlx4_4 uverbs4 /sys/class/infiniband_verbs/uverbs4 /sys/class/infiniband/mlx4_4} eth5}] 
 INFO[0000] Starting FS watcher.                         

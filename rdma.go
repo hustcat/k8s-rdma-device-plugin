@@ -2,13 +2,12 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 
-	"golang.org/x/net/context"
-	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1alpha"
-
 	"github.com/hustcat/k8s-rdma-device-plugin/ibverbs"
+	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1alpha"
 )
 
 const RdmaDeviceRource = "/sys/class/infiniband/%s/device/resource"

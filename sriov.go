@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
+	log "k8s.io/klog"
 )
 
 const VfNetDevicePath = "/sys/class/net/%s/device/virtfn%d/net"
