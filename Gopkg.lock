@@ -143,9 +143,9 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:c0724163322e9fcd97ab141656d550ed898e6686a5acd812396de8aa4120a71b"
+  digest = "1:6a15e7ea08b2ddf329857d6611bbc7b17801d34175b0d93088ae1aede3f47872"
   name = "k8s.io/kubernetes"
-  packages = ["pkg/kubelet/apis/deviceplugin/v1alpha"]
+  packages = ["pkg/kubelet/apis/deviceplugin/v1beta1"]
   pruneopts = "UT"
   revision = "2bd9643cee5b3b3a5ecbd3af49d09018f0773c77"
   version = "v1.16.0"
@@ -157,7 +157,7 @@
     "github.com/fsnotify/fsnotify",
     "google.golang.org/grpc",
     "k8s.io/klog",
-    "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1alpha",
+    "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1beta1",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
