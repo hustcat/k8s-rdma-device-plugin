@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/hustcat/k8s-rdma-device-plugin/ibverbs"
-	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1alpha"
+	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1beta1"
 )
 
 const (
@@ -121,6 +121,9 @@ func getNetDeviceResoure(name string) ([]byte, error) {
 func getRdmaDeviceNumaNode(name string) (int, error) {
 	numaNodeFile := fmt.Sprintf(RdmaDeviceNumaNode, name)
 	data, err := ioutil.ReadFile(numaNodeFile)
+	if err != nil {
+		return 0, err
+	}
 	return strconv.Atoi(string(data))
 }
 

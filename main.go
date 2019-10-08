@@ -7,7 +7,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	log "k8s.io/klog"
-	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1alpha"
+	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1beta1"
 )
 
 var (
