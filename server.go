@@ -47,6 +47,13 @@ func NewRdmaDevicePlugin(master string) *RdmaDevicePlugin {
 		devs = append(devs, &pluginapi.Device{
 			ID:     id,
 			Health: pluginapi.Healthy,
+			Topology: &pluginapi.TopologyInfo{
+				Nodes: []*pluginapi.NUMANode{
+					&pluginapi.NUMANode{
+						ID: device.NumaNode,
+					},
+				},
+			},
 		})
 		devMap[id] = device
 	}

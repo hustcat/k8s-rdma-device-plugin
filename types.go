@@ -7,4 +7,5 @@ import (
 type Device struct {
 	RdmaDevice ibverbs.IbvDevice
 	NetDevice  string
+	NumaNode   int64
 }
