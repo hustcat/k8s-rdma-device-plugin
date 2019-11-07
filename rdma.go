@@ -5,13 +5,17 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"strconv"
 
 	"github.com/hustcat/k8s-rdma-device-plugin/ibverbs"
-	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1alpha"
+	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1beta1"
 )
 
-const RdmaDeviceRource = "/sys/class/infiniband/%s/device/resource"
-const NetDeviceRource = "/sys/class/net/%s/device/resource"
+const (
+	RdmaDeviceRource   = "/sys/class/infiniband/%s/device/resource"
+	NetDeviceRource    = "/sys/class/net/%s/device/resource"
+	RdmaDeviceNumaNode = "/sys/class/infiniband/%s/device/numa_node"
+)
 
 func GetDevices(masterNetDevice string) ([]Device, error) {
 	if masterNetDevice == "" {
@@ -43,12 +47,17 @@ func getAllRdmaDeivces() ([]Device, error) {
 			if err != nil {
 				return nil, err
 			}
+			nn, err := getRdmaDeviceNumaNode(d.Name)
+			if err != nil {
+				return nil, err
+			}
 
 			// the same device
 			if bytes.Compare(dResource, nResource) == 0 {
 				devs = append(devs, Device{
 					RdmaDevice: d,
 					NetDevice:  n,
+					NumaNode:   int64(nn),
 				})
 			}
 		}
@@ -79,12 +88,17 @@ func getRdmaDeivces(masterNetDevice string) ([]Device, error) {
 			if err != nil {
 				return nil, err
 			}
+			nn, err := getRdmaDeviceNumaNode(d.Name)
+			if err != nil {
+				return nil, err
+			}
 
 			// the same device
 			if bytes.Compare(dResource, nResource) == 0 {
 				devs = append(devs, Device{
 					RdmaDevice: d,
 					NetDevice:  n,
+					NumaNode:   int64(nn),
 				})
 			}
 		}
@@ -102,6 +116,15 @@ func getNetDeviceResoure(name string) ([]byte, error) {
 	resourceFile := fmt.Sprintf(NetDeviceRource, name)
 	data, err := ioutil.ReadFile(resourceFile)
 	return data, err
+}
+
+func getRdmaDeviceNumaNode(name string) (int, error) {
+	numaNodeFile := fmt.Sprintf(RdmaDeviceNumaNode, name)
+	data, err := ioutil.ReadFile(numaNodeFile)
+	if err != nil {
+		return 0, err
+	}
+	return strconv.Atoi(string(data))
 }
 
 func deviceExists(devs []*pluginapi.Device, id string) bool {

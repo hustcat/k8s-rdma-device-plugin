@@ -10,7 +10,7 @@ import (
 
 	"google.golang.org/grpc"
 	log "k8s.io/klog"
-	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1alpha"
+	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1beta1"
 )
 
 const (
@@ -47,6 +47,13 @@ func NewRdmaDevicePlugin(master string) *RdmaDevicePlugin {
 		devs = append(devs, &pluginapi.Device{
 			ID:     id,
 			Health: pluginapi.Healthy,
+			Topology: &pluginapi.TopologyInfo{
+				Nodes: []*pluginapi.NUMANode{
+					{
+						ID: device.NumaNode,
+					},
+				},
+			},
 		})
 		devMap[id] = device
 	}
@@ -59,6 +66,10 @@ func NewRdmaDevicePlugin(master string) *RdmaDevicePlugin {
 		stop:            make(chan interface{}),
 		health:          make(chan *pluginapi.Device),
 	}
+}
+
+func (m *RdmaDevicePlugin) GetDevicePluginOptions(context.Context, *pluginapi.Empty) (*pluginapi.DevicePluginOptions, error) {
+	return &pluginapi.DevicePluginOptions{}, nil
 }
 
 // dial establishes the gRPC communication with the registered device plugin.
@@ -164,46 +175,52 @@ func (m *RdmaDevicePlugin) unhealthy(dev *pluginapi.Device) {
 // Allocate which return list of devices.
 func (m *RdmaDevicePlugin) Allocate(ctx context.Context, r *pluginapi.AllocateRequest) (*pluginapi.AllocateResponse, error) {
 	devs := m.devs
-	response := pluginapi.AllocateResponse{}
+	response := pluginapi.AllocateResponse{ContainerResponses: []*pluginapi.ContainerAllocateResponse{}}
 
-	log.V(1).Infof("Request IDs: %v", r.DevicesIDs)
-	var devicesList []*pluginapi.DeviceSpec
-	for _, id := range r.DevicesIDs {
-		if !deviceExists(devs, id) {
-			return nil, fmt.Errorf("invalid allocation request: unknown device: %s", id)
+	log.V(1).Infof("Request IDs: %v", r.ContainerRequests)
+	for _, container := range r.ContainerRequests {
+		var devicesList []*pluginapi.DeviceSpec
+		for _, id := range container.DevicesIDs {
+			if !deviceExists(devs, id) {
+				return nil, fmt.Errorf("invalid allocation request: unknown device: %s", id)
+			}
+
+			var devPath string
+			if dev, ok := m.devices[id]; ok {
+				// TODO: to function
+				devPath = fmt.Sprintf("/dev/infiniband/%s", dev.RdmaDevice.DevName)
+			} else {
+				continue
+			}
+
+			ds := &pluginapi.DeviceSpec{
+				ContainerPath: devPath,
+				HostPath:      devPath,
+				Permissions:   "rw",
+			}
+			devicesList = append(devicesList, ds)
 		}
-
-		var devPath string
-		if dev, ok := m.devices[id]; ok {
-			// TODO: to function
-			devPath = fmt.Sprintf("/dev/infiniband/%s", dev.RdmaDevice.DevName)
-		} else {
-			continue
+		// for /dev/infiniband/rdma_cm
+		rdma_cm_paths := []string{
+			"/dev/infiniband/rdma_cm",
 		}
-
-		ds := &pluginapi.DeviceSpec{
-			ContainerPath: devPath,
-			HostPath:      devPath,
-			Permissions:   "rw",
+		for _, dev := range rdma_cm_paths {
+			devicesList = append(devicesList, &pluginapi.DeviceSpec{
+				ContainerPath: dev,
+				HostPath:      dev,
+				Permissions:   "rw",
+			})
 		}
-		devicesList = append(devicesList, ds)
-	}
-
-	// for /dev/infiniband/rdma_cm
-	rdma_cm_paths := []string{
-		"/dev/infiniband/rdma_cm",
-	}
-	for _, dev := range rdma_cm_paths {
-		devicesList = append(devicesList, &pluginapi.DeviceSpec{
-			ContainerPath: dev,
-			HostPath:      dev,
-			Permissions:   "rw",
+		response.ContainerResponses = append(response.ContainerResponses, &pluginapi.ContainerAllocateResponse{
+			Devices: devicesList,
 		})
 	}
 
-	response.Devices = devicesList
-
 	return &response, nil
+}
+
+func (m *RdmaDevicePlugin) PreStartContainer(context.Context, *pluginapi.PreStartContainerRequest) (*pluginapi.PreStartContainerResponse, error) {
+	return &pluginapi.PreStartContainerResponse{}, nil
 }
 
 func (m *RdmaDevicePlugin) cleanup() error {
