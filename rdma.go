@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strconv"
+	"strings"
 
 	"github.com/hustcat/k8s-rdma-device-plugin/ibverbs"
 	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1beta1"
@@ -124,7 +125,10 @@ func getRdmaDeviceNumaNode(name string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return strconv.Atoi(string(data))
+
+	dataStr := string(data)
+	dataStr = strings.TrimSuffix(dataStr, "\n")
+	return strconv.Atoi(dataStr)
 }
 
 func deviceExists(devs []*pluginapi.Device, id string) bool {
