@@ -2,7 +2,7 @@
 
 ## Introduction
 
-`k8s-rdma-device-plugin` is a [device plugin](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/resource-management/device-plugin.md) for Kubernetes to manage [RDMA](https://en.wikipedia.org/wiki/Remote_direct_memory_access) device.
+`k8s-rdma-device-plugin` is a [device plugin](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/) for Kubernetes to manage [RDMA](https://en.wikipedia.org/wiki/Remote_direct_memory_access) device.
 
 RDMA(remote direct memory access) is a high performance network protocol, which has the following major advantages:
 
